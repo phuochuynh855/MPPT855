@@ -47,35 +47,32 @@
 </div>
 
 <script>
-    // 2. PHẢI CÓ ĐỦ CẢ APIKEY VÀ DATABASEURL
     const firebaseConfig = {
-        apiKey: "DÁN_API_KEY_CỦA_BẠN_VÀO_ĐÂY",
+        apiKey: "DÁN_API_KEY_CỦA_BẠN",
         databaseURL: "https://firebasedatabase.app"
     };
     
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function connectFirebase() {
-        const phone = document.getElementById('phoneInput').value;
-        if(!phone) { alert("Vui lòng nhập số điện thoại"); return; }
+    // TỰ ĐỘNG LẤY ID TỪ LINK
+    const urlParams = new URLSearchParams(window.location.search);
+    const deviceID = urlParams.get('id'); 
 
-        // 3. Đọc từ mục 'users' để khớp với code ESP8266
-        db.ref('users/' + phone).on('value', (snapshot) => {
+    if (deviceID) {
+        // Nếu thấy có ID trên link, hiện bảng dữ liệu luôn
+        document.getElementById('monitor').style.display = 'grid';
+        
+        db.ref('devices/' + deviceID).on('value', (snapshot) => {
             const data = snapshot.val();
             if(data) {
-                document.getElementById('monitor').style.display = 'grid';
-                
-                // Lấy đúng tên biến vOut, iOut, pNow từ ESP8266
                 document.getElementById('v_out').innerText = data.vOut || "0.0";
                 document.getElementById('a_sac').innerText = data.iOut || "0.0";
                 document.getElementById('watt').innerText = data.pNow || "0";
                 document.getElementById('temp').innerText = data.temp || "0";
-            } else {
-                alert("Không có dữ liệu! Hãy kiểm tra ESP8266 đã gửi số lên chưa.");
             }
         });
+    } else {
+        document.body.innerHTML = "<h1>Vui lòng truy cập từ liên kết của thiết bị!</h1>";
     }
 </script>
-</body>
-</html>
