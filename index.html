@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GIÁM SÁT PIN MPPT855</title>
-    <!-- Nhúng thư viện Firebase -->
+    <!-- 1. Nhúng thư viện Firebase chuẩn (Bắt buộc) -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
     <style>
@@ -28,8 +28,8 @@
 
     <div id="monitor" class="data-grid">
         <div class="box">
-            <div class="unit">ĐIỆN ÁP TỔNG</div>
-            <div class="val"><span id="v_tong">0.0</span> <small>V</small></div>
+            <div class="unit">ĐIỆN ÁP RA</div>
+            <div class="val"><span id="v_out">0.0</span> <small>V</small></div>
         </div>
         <div class="box">
             <div class="unit">DÒNG SẠC</div>
@@ -40,16 +40,17 @@
             <div class="val"><span id="watt">0</span> <small>W</small></div>
         </div>
         <div class="box">
-            <div class="unit">TRẠNG THÁI</div>
-            <div class="val" id="status" style="font-size: 18px;">Đang sạc</div>
+            <div class="unit">NHIỆT ĐỘ</div>
+            <div class="val"><span id="temp">0</span> <small>°C</small></div>
         </div>
     </div>
 </div>
 
 <script>
-    // CẤU HÌNH THÔNG TIN CỦA BẠN VÀO ĐÂY
+    // 2. PHẢI CÓ ĐỦ CẢ APIKEY VÀ DATABASEURL
     const firebaseConfig = {
-        databaseURL: "https://mppt855-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        apiKey: "DÁN_API_KEY_CỦA_BẠN_VÀO_ĐÂY",
+        databaseURL: "https://firebasedatabase.app"
     };
     
     firebase.initializeApp(firebaseConfig);
@@ -59,16 +60,19 @@
         const phone = document.getElementById('phoneInput').value;
         if(!phone) { alert("Vui lòng nhập số điện thoại"); return; }
 
-        // Lấy dữ liệu thời gian thực
-        db.ref('devices/' + phone).on('value', (snapshot) => {
+        // 3. Đọc từ mục 'users' để khớp với code ESP8266
+        db.ref('users/' + phone).on('value', (snapshot) => {
             const data = snapshot.val();
             if(data) {
                 document.getElementById('monitor').style.display = 'grid';
-                document.getElementById('v_tong').innerText = data.voltage || "0.0";
-                document.getElementById('a_sac').innerText = data.current || "0.0";
-                document.getElementById('watt').innerText = (data.voltage * data.current).toFixed(1);
+                
+                // Lấy đúng tên biến vOut, iOut, pNow từ ESP8266
+                document.getElementById('v_out').innerText = data.vOut || "0.0";
+                document.getElementById('a_sac').innerText = data.iOut || "0.0";
+                document.getElementById('watt').innerText = data.pNow || "0";
+                document.getElementById('temp').innerText = data.temp || "0";
             } else {
-                alert("Không tìm thấy thiết bị cho số điện thoại này!");
+                alert("Không có dữ liệu! Hãy kiểm tra ESP8266 đã gửi số lên chưa.");
             }
         });
     }
