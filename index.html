@@ -19,7 +19,7 @@ button { font-size:1em; padding:8px 12px; cursor:pointer; }
 
 <div class="container">
   <h1>MPPT855 Dashboard</h1>
-  <div>
+  <div id="sdtContainer">
     <input type="text" id="sdtInput" placeholder="Nhập SĐT thiết bị">
     <button onclick="setSDT()">Xem dữ liệu</button>
   </div>
@@ -39,7 +39,14 @@ button { font-size:1em; padding:8px 12px; cursor:pointer; }
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  let sdt = null;
+  let sdt = localStorage.getItem('sdt') || null;
+
+  // Nếu đã lưu SDT → ẩn input
+  if(sdt){
+    document.getElementById('sdtContainer').style.display = 'none';
+    document.getElementById('status').innerText = "Đang kết nối...";
+    document.getElementById('status').style.color = "orange";
+  }
 
   function setSDT() {
     const input = document.getElementById('sdtInput').value.trim();
@@ -48,6 +55,8 @@ button { font-size:1em; padding:8px 12px; cursor:pointer; }
       return;
     }
     sdt = input;
+    localStorage.setItem('sdt', sdt);
+    document.getElementById('sdtContainer').style.display = 'none';
     document.getElementById('status').innerText = "Đang kết nối...";
     document.getElementById('status').style.color = "orange";
   }
