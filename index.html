@@ -43,6 +43,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// Lấy SDT lưu trước trong localStorage nếu có
 let sdt = localStorage.getItem('sdt') || null;
 if(sdt){
   document.getElementById('sdtContainer').style.display='none';
@@ -60,12 +61,14 @@ function setSDT(){
   document.getElementById('status').style.color="orange";
 }
 
+// Hàm cập nhật dữ liệu từ Firebase
 function updateData(){
   if(!sdt) return;
   db.ref('/devices/'+sdt).once('value')
     .then(snapshot=>{
       const data = snapshot.val();
       if(data){
+        // Kiểm tra tồn tại dữ liệu trước khi hiển thị
         document.getElementById('vin').innerText = data.vIn !== undefined ? data.vIn.toFixed(2) : "--";
         document.getElementById('vout').innerText = data.vOut !== undefined ? data.vOut.toFixed(2) : "--";
         document.getElementById('iout').innerText = data.iOut !== undefined ? data.iOut.toFixed(2) : "--";
@@ -88,6 +91,7 @@ function updateData(){
     });
 }
 
+// Cập nhật dữ liệu mỗi 2 giây
 setInterval(updateData,2000);
 </script>
 
