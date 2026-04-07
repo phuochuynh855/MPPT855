@@ -3,76 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GIÁM SÁT PIN MPPT855</title>
-    <!-- 1. Nhúng thư viện Firebase chuẩn (Bắt buộc) -->
+    <title>GIÁM SÁT MPPT855</title>
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0e14; color: #e0e0e0; text-align: center; padding: 20px; }
         .container { max-width: 500px; margin: auto; background: #1c2128; padding: 20px; border-radius: 15px; border: 1px solid #30363d; }
-        input { width: 80%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; background: #0d1117; color: white; font-size: 16px; }
-        button { width: 85%; padding: 12px; background: #238636; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .data-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; display: none; }
+        .data-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
         .box { background: #21262d; padding: 15px; border-radius: 10px; border-bottom: 3px solid #238636; }
         .val { font-size: 24px; color: #39d353; font-weight: bold; }
         .unit { font-size: 14px; color: #8b949e; }
+        #status-msg { color: #f1c40f; margin-bottom: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <h2>HỆ THỐNG SOLAR</h2>
-    <p>Nhập số điện thoại để tra cứu</p>
-    <input type="text" id="phoneInput" placeholder="Số điện thoại khách hàng...">
-    <button onclick="connectFirebase()">TRA CỨU NGAY</button>
+    <h2>HỆ THỐNG MPPT855</h2>
+    <div id="status-msg">Đang kiểm tra kết nối...</div>
 
     <div id="monitor" class="data-grid">
-        <div class="box">
-            <div class="unit">ĐIỆN ÁP RA</div>
-            <div class="val"><span id="v_out">0.0</span> <small>V</small></div>
-        </div>
-        <div class="box">
-            <div class="unit">DÒNG SẠC</div>
-            <div class="val"><span id="a_sac">0.0</span> <small>A</small></div>
-        </div>
-        <div class="box">
-            <div class="unit">CÔNG SUẤT</div>
-            <div class="val"><span id="watt">0</span> <small>W</small></div>
-        </div>
-        <div class="box">
-            <div class="unit">NHIỆT ĐỘ</div>
-            <div class="val"><span id="temp">0</span> <small>°C</small></div>
-        </div>
+        <div class="box"><div class="unit">V-VÀO</div><div class="val"><span id="vIn">0.0</span><small>V</small></div></div>
+        <div class="box"><div class="unit">V-RA</div><div class="val"><span id="vOut">0.0</span><small>V</small></div></div>
+        <div class="box"><div class="unit">DÒNG SẠC</div><div class="val"><span id="iOut">0.0</span><small>A</small></div></div>
+        <div class="box"><div class="unit">CÔNG SUẤT</div><div class="val"><span id="pNow">0</span><small>W</small></div></div>
     </div>
 </div>
 
 <script>
     const firebaseConfig = {
-        apiKey: "DÁN_API_KEY_CỦA_BẠN",
+        apiKey: "AIzaSyDEA0sMeMinC9RR2vHnaPojcCVaPkYgEyI",
         databaseURL: "https://firebasedatabase.app"
     };
-    
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // TỰ ĐỘNG LẤY ID TỪ LINK
+    // TỰ ĐỘNG LẤY ID TỪ LINK: phuochuynh855.github.io/MPPT855/?id=xxxx
     const urlParams = new URLSearchParams(window.location.search);
-    const deviceID = urlParams.get('id'); 
+    const deviceID = urlParams.get('id');
 
     if (deviceID) {
-        // Nếu thấy có ID trên link, hiện bảng dữ liệu luôn
-        document.getElementById('monitor').style.display = 'grid';
-        
+        document.getElementById('status-msg').innerText = "Đang xem máy: " + deviceID;
         db.ref('devices/' + deviceID).on('value', (snapshot) => {
             const data = snapshot.val();
             if(data) {
-                document.getElementById('v_out').innerText = data.vOut || "0.0";
-                document.getElementById('a_sac').innerText = data.iOut || "0.0";
-                document.getElementById('watt').innerText = data.pNow || "0";
-                document.getElementById('temp').innerText = data.temp || "0";
+                document.getElementById('vIn').innerText = data.vIn || "0.0";
+                document.getElementById('vOut').innerText = data.vOut || "0.0";
+                document.getElementById('iOut').innerText = data.iOut || "0.0";
+                document.getElementById('pNow').innerText = data.pNow || "0";
+            } else {
+                document.getElementById('status-msg').innerText = "Thiết bị chưa có dữ liệu!";
             }
         });
     } else {
-        document.body.innerHTML = "<h1>Vui lòng truy cập từ liên kết của thiết bị!</h1>";
+        document.getElementById('status-msg').innerText = "LỖI: Link thiếu mã ID máy!";
+        document.getElementById('monitor').style.opacity = "0.3";
     }
 </script>
+</body>
+</html>
